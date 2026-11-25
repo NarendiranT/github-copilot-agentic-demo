@@ -4,7 +4,7 @@ End-to-end agentic AI-driven SDLC using GitHub Copilot.
 
 ## Python environment
 
-This repository uses a local virtual environment named `.venv`, created with Python 3.12 or newer. Application dependencies are not installed yet.
+This repository uses a local virtual environment named `.venv`, created with Python 3.12 or newer. Install application and development dependencies into that environment; do not create a second one.
 
 Detected on setup:
 
@@ -67,4 +67,92 @@ New integrated terminals should activate `.venv` when the Python extension is in
 ```
 
 `.venv`, Python cache files (`__pycache__/`, `*.pyc`), and environment secret files (including `.env`) are listed in [.gitignore](.gitignore) and should not be committed.
+
+## Dependencies
+
+Application and development dependencies are declared separately in [pyproject.toml](pyproject.toml). Requires Python 3.12 or newer and the existing `.venv`. The installable project currently contains no importable packages; application code is not part of this setup.
+
+Application:
+
+- FastAPI
+- Uvicorn
+- SQLAlchemy with the `asyncio` extra, so async engines can use aiosqlite
+- aiosqlite
+- Pydantic Settings
+
+Development (`dev` extra):
+
+- Ruff
+- Pytest
+- Pytest-asyncio
+- Pytest-cov
+- HTTPX
+
+Upgrade pip before installing, as shown under [Create the environment](#create-the-environment).
+
+### Install application dependencies
+
+macOS and Linux:
+
+```bash
+.venv/bin/python -m pip install -e .
+```
+
+Windows (PowerShell):
+
+```powershell
+.\.venv\Scripts\python -m pip install -e .
+```
+
+### Install development dependencies
+
+This also installs the application dependencies.
+
+macOS and Linux:
+
+```bash
+.venv/bin/python -m pip install -e ".[dev]"
+```
+
+Windows (PowerShell):
+
+```powershell
+.\.venv\Scripts\python -m pip install -e ".[dev]"
+```
+
+### Validate
+
+macOS and Linux:
+
+```bash
+.venv/bin/python -m pip check
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format --check .
+.venv/bin/python -m pytest
+```
+
+Windows (PowerShell):
+
+```powershell
+.\.venv\Scripts\python -m pip check
+.\.venv\Scripts\python -m ruff check .
+.\.venv\Scripts\python -m ruff format --check .
+.\.venv\Scripts\python -m pytest
+```
+
+Ruff is configured for linting, formatting, and import sorting (the `I` / isort rule set). Pytest is configured for asynchronous tests (`asyncio_mode = "auto"`). The coverage target is 80% (`--cov-fail-under=80` and `[tool.coverage.report] fail_under`).
+
+Application implementation and test cases are out of scope for this setup. Until those exist, `pytest` collects no tests and fails the coverage gate. `pip check`, `ruff check`, and `ruff format --check` should pass.
+
+### Verification
+
+Checked on Python 3.12.3 in `.venv` after `pip install -e ".[dev]"`:
+
+- `pip check` reported no broken requirements.
+- Resolved direct dependencies: FastAPI 0.165.0, Uvicorn 0.54.0, SQLAlchemy 2.1.9 (asyncio extra, which installed greenlet 3.5.6), aiosqlite 0.22.1, Pydantic Settings 2.16.3, Ruff 0.17.6, Pytest 9.2.0, Pytest-asyncio 1.5.0, Pytest-cov 7.1.0, HTTPX 0.28.1.
+- Imports succeeded for those packages. An in-memory `sqlite+aiosqlite` async connection returned `1`. Pydantic Settings loaded a default value.
+- `ruff check .` and `ruff format --check .` passed.
+- Pytest loaded `pyproject.toml` with `asyncio_mode=auto`, function-scoped asyncio loops, and the 80% coverage gate. With no tests present, the run failed that gate (`total coverage: 0.00%`) rather than failing configuration parsing.
+
+Starlette's `TestClient` still imports HTTPX, and warns that `httpx2` is preferred. HTTPX remains the configured development HTTP client, as specified.
 

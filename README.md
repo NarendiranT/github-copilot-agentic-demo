@@ -70,7 +70,7 @@ New integrated terminals should activate `.venv` when the Python extension is in
 
 ## Dependencies
 
-Application and development dependencies are declared separately in [pyproject.toml](pyproject.toml). Requires Python 3.12 or newer and the existing `.venv`. The installable project currently contains no importable packages; application code is not part of this setup.
+Application and development dependencies are declared separately in [pyproject.toml](pyproject.toml). Requires Python 3.12 or newer and the existing `.venv`. The application code lives in the `app` package and is run from the repository root (see [Run the application](#run-the-application)).
 
 Application:
 
@@ -142,11 +142,39 @@ Windows (PowerShell):
 
 Ruff is configured for linting, formatting, and import sorting (the `I` / isort rule set). Pytest is configured for asynchronous tests (`asyncio_mode = "auto"`). The coverage target is 80% (`--cov-fail-under=80` and `[tool.coverage.report] fail_under`).
 
-Application implementation and test cases are out of scope for this setup. Until those exist, `pytest` collects no tests and fails the coverage gate. `pip check`, `ruff check`, and `ruff format --check` should pass.
+`pytest` runs the suite in `tests/` and enforces the 80% coverage gate. `pip check`, `ruff check .`, and `ruff format --check .` pass. Ruff excludes `.github/hooks` (`extend-exclude` in `pyproject.toml`).
+
+## Run the application
+
+Prerequisite: the existing `.venv` with the development dependencies installed (see [Install development dependencies](#install-development-dependencies)).
+
+From the repository root, start the server.
+
+macOS and Linux:
+
+```bash
+.venv/bin/python -m uvicorn app.main:app --reload
+```
+
+Windows (PowerShell):
+
+```powershell
+.\.venv\Scripts\python -m uvicorn app.main:app --reload
+```
+
+Check the health endpoint (no authentication required):
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Expected response (HTTP 200): `{"status":"healthy"}`
+
+Interactive API documentation (Swagger UI) is available at <http://127.0.0.1:8000/docs>.
 
 ### Verification
 
-Checked on Python 3.12.3 in `.venv` after `pip install -e ".[dev]"`:
+Checked on Python 3.12.3 in `.venv` after `pip install -e ".[dev]"`. This is a snapshot from the initial environment setup, before any application code existed, so its "no tests present" and `0.00%` coverage results are historical:
 
 - `pip check` reported no broken requirements.
 - Resolved direct dependencies: FastAPI 0.165.0, Uvicorn 0.54.0, SQLAlchemy 2.1.9 (asyncio extra, which installed greenlet 3.5.6), aiosqlite 0.22.1, Pydantic Settings 2.16.3, Ruff 0.17.6, Pytest 9.2.0, Pytest-asyncio 1.5.0, Pytest-cov 7.1.0, HTTPX 0.28.1.

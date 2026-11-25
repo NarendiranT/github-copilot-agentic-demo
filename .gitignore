@@ -151,6 +151,9 @@ activemq-data/
 
 # Environments
 .env
+.env.*
+!.env.example
+!.env.sample
 .envrc
 .venv
 env/
@@ -158,6 +161,16 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Environment secrets
+*.pem
+*.key
+secrets.json
+secrets.yaml
+secrets.yml
+credentials.json
+credentials.yaml
+credentials.yml
 
 # Conda environments
 conda-meta/

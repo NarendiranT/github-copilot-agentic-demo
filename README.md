@@ -172,6 +172,22 @@ Expected response (HTTP 200): `{"status":"healthy"}`
 
 Interactive API documentation (Swagger UI) is available at <http://127.0.0.1:8000/docs>.
 
+### Blog API
+
+Blogs have `id`, `title`, `content`, `created_at` and `updated_at` (UTC). `title` and `content` are required and must not be blank; surrounding whitespace is trimmed.
+
+| Method and path | Success | Notes |
+| --- | --- | --- |
+| `POST /blogs` | 201 | Body: `title`, `content` |
+| `GET /blogs` | 200 | Ordered by `id` |
+| `GET /blogs/{id}` | 200 | |
+| `PATCH /blogs/{id}` | 200 | Updates only the supplied fields; body must not be empty |
+| `DELETE /blogs/{id}` | 204 | Empty body |
+
+A missing blog returns 404; invalid input or ids return 422.
+
+Blogs are stored in SQLite and persist across restarts. Set `DATABASE_URL` to change the database (default `sqlite+aiosqlite:///./db.sqlite3`, ignored by Git).
+
 ### Verification
 
 Checked on Python 3.12.3 in `.venv` after `pip install -e ".[dev]"`. This is a snapshot from the initial environment setup, before any application code existed, so its "no tests present" and `0.00%` coverage results are historical:
